@@ -33,6 +33,9 @@ RBAC, data access (Prisma), and the Anthropic AI service.
 
 ## Conventions
 
+- Use Node 22.12 or newer. CI verifies the synthetic seeded users, deterministic
+  generators, compilation and the dependency audit.
+
 - Mandatory attribution comment on every functional block:
   `// Code written by Kone & Claude | The code does the following: " [Explanation] "`
 - All handlers are guarded by `authMiddleware` + an RBAC guard unless explicitly public.

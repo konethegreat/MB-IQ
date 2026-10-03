@@ -43,6 +43,9 @@ runs on Windows, macOS, and any modern browser/tablet from one codebase.
 
 ## Conventions
 
+- Tooling: Vite 7 and React Router 7; use Node 22.12 or newer. CI builds the app
+  and rejects moderate or higher dependency audit findings.
+
 - Mandatory attribution comment on every functional block:
   `// Code written by Kone & Claude | The code does the following: " [Explanation] "`
 - The frontend never decides permissions on its own authority — it mirrors `config/roles.ts` for UX,
