@@ -2,6 +2,7 @@
   "name": "mb-iq-backend",
   "version": "0.2.0",
   "private": true,
+  "engines": { "node": ">=22.12.0" },
   "description": "Demo Engineering Command Centre - REST API. Built by Kone & Claude.",
   "author": "Kone",
   "license": "UNLICENSED",

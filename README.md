@@ -22,8 +22,9 @@ migration work; a build alone does not verify that migration.
 
 ## Stack
 
-React 18, TypeScript, Vite, Express, Prisma 5, SQLite, Mermaid, and optional
-Anthropic/MCP integrations. Use Node.js 22 with the committed package locks.
+React 18, TypeScript, Vite 7, React Router 7, Express, Prisma 5, SQLite, Mermaid,
+and optional Anthropic/MCP integrations. Use Node.js 22.12 or newer with the
+committed package locks.
 
 ## Local demonstration
 

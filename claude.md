@@ -17,6 +17,9 @@ It will be **hosted on the firm's own server under the firm's domain**, authenti
 
 ## 2. Chosen technology stack (decided 2026-06-19)
 
+Maintenance update (3 October 2026): the public snapshot uses Vite 7 and React
+Router 7 with Node 22.12 or newer. Both dependency audits are checked in CI.
+
 | Layer | Choice | Why |
 |-------|--------|-----|
 | Frontend | React 18 + TypeScript + Vite + React Router | Browser-based ⇒ cross-platform (Windows, macOS, Linux, tablets) with one codebase. Fast, well-supported, easy to host as static assets behind the firm's domain. |

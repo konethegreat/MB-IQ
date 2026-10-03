@@ -2,6 +2,7 @@
   "name": "mb-iq-frontend",
   "version": "0.2.0",
   "private": true,
+  "engines": { "node": ">=22.12.0" },
   "description": "Demo Engineering Command Centre - React web app. Built by Kone & Claude.",
   "author": "Kone",
   "type": "module",
@@ -15,14 +16,14 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^6.26.0",
+    "react-router-dom": "^7.18.4",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "typescript": "^5.5.0",
-    "vite": "^5.4.0"
+    "vite": "^7.3.6"
   }
 }
