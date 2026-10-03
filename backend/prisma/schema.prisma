@@ -1,0 +1,187 @@
+// Prisma schema — Demo Engineering Command Centre
+// Maintained by Kone & Claude.
+//
+// PLUG-AND-GO: the demo uses SQLite so the system runs with zero setup. To adopt the
+// organisation's database later, change `provider` below to "postgresql" or "mysql" and set
+// DATABASE_URL in .env — no application code changes are required.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User of the system. `role` holds one of the 5 RBAC tier keys (see src/config/rbac.ts).
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String // FINAL_LEADER | SQUAD_LEADER | TEAM_CAPTAIN | SOFTWARE_ENGINEER | GENERAL_FIRM
+  team         String? // "Team Alpha", "Team Apex", "Management", or null for general firm
+  avatar       String?
+  createdAt    DateTime @default(now())
+
+  ownedProjects Project[] @relation("ProjectOwner")
+  assignedTasks Task[]    @relation("TaskOwner")
+  notes         Note[]
+  messages      Message[]
+}
+
+// A project / product the department is delivering.
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  status      String   @default("Idea") // Idea | Development | Testing | Deployed | On Hold
+  priority    String   @default("Medium")
+  health      String   @default("Green") // Green | Amber | Red
+  description String
+  team        String?
+  ownerId     String?
+  owner       User?    @relation("ProjectOwner", fields: [ownerId], references: [id])
+  startDate   DateTime?
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  tasks     Task[]
+  sprints   Sprint[]
+  documents Document[]
+}
+
+// A sprint groups tasks within a time-box for a team.
+model Sprint {
+  id        String    @id @default(cuid())
+  name      String
+  team      String?
+  goal      String?
+  startDate DateTime?
+  endDate   DateTime?
+  projectId String?
+  project   Project?  @relation(fields: [projectId], references: [id])
+  tasks     Task[]
+}
+
+// A Jira-style ticket/task.
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("To Do") // To Do | In Progress | In Review | Testing | Blocked | Done
+  priority    String    @default("Medium")
+  branch      String?
+  acceptance  String?
+  dueDate     DateTime?
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id])
+  sprintId    String?
+  sprint      Sprint?   @relation(fields: [sprintId], references: [id])
+  ownerId     String?
+  owner       User?     @relation("TaskOwner", fields: [ownerId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+// Documentation records stored in the system.
+model Document {
+  id        String   @id @default(cuid())
+  title     String
+  type      String
+  status    String   @default("Draft")
+  content   String
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  updatedAt DateTime @updatedAt
+}
+
+// Captured meeting + AI-generated structured summary.
+model Meeting {
+  id         String   @id @default(cuid())
+  title      String
+  type       String
+  transcript String
+  summary    String?
+  createdBy  String?
+  createdAt  DateTime @default(now())
+}
+
+// Team communication message in a channel.
+model Message {
+  id        String   @id @default(cuid())
+  channel   String
+  body      String
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// Brief note left for the IT division — primarily used by the General Firm tier.
+model Note {
+  id        String   @id @default(cuid())
+  subject   String?  // optional user title; AI may refine on ingest
+  body      String
+  summary   String?  // AI-organised one-line summary shown back to the author
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id])
+  status    String   @default("New") // New | Seen | Resolved
+  createdAt DateTime @default(now())
+}
+
+// ---- v0.3 (MCP Host era) ------------------------------------------------------------------------
+
+// Singleton application settings: AI execution mode (Max/Saver) and the monthly AI budget.
+// Tier-2 (admins) own these via the Settings panel.
+model AppSettings {
+  id               String   @id @default("singleton")
+  mode             String   @default("MAX") // MAX | SAVER
+  aiModel          String   @default("") // empty = fall back to ANTHROPIC_MODEL env
+  currency         String   @default("USD") // USD | ZAR — display currency for cost analytics
+  monthlyBudgetUsd Float    @default(50)
+  monthlyBudgetZar Float    @default(900)
+  updatedBy        String?
+  updatedAt        DateTime @updatedAt
+}
+
+// One row per AI API call, for real-time token & cost analytics and budget tracking.
+model AiUsage {
+  id           String   @id @default(cuid())
+  feature      String // summary | meeting | coach | report | classify | docgen | agent
+  model        String
+  mode         String // MAX | SAVER at time of the call
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costUsd      Float    @default(0)
+  userId       String?
+  createdAt    DateTime @default(now())
+}
+
+// AI-generated triage for an incoming item (a note/issue/alert). One row per item.
+model Classification {
+  id        String   @id @default(cuid())
+  itemType  String // note | task
+  itemId    String
+  category  String
+  tags      String   @default("") // comma-separated
+  severity  String   @default("Medium") // Low | Medium | High | Critical
+  createdAt DateTime @default(now())
+
+  @@unique([itemType, itemId])
+}
+
+// A destructive agent action awaiting explicit human approval (Human-in-the-Loop). Created by the agent
+// loop; executed ONLY when a human approves it.
+model PendingAction {
+  id         String    @id @default(cuid())
+  provider   String // internal | github
+  tool       String
+  args       String // JSON-encoded arguments
+  summary    String
+  status     String    @default("PENDING") // PENDING | APPROVED | REJECTED | EXECUTED | FAILED
+  result     String?
+  proposedBy String?
+  decidedBy  String?
+  createdAt  DateTime  @default(now())
+  decidedAt  DateTime?
+}

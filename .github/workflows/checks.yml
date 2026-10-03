@@ -1,0 +1,48 @@
+name: Demo checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: development
+      DATABASE_URL: file:./ci-demo.db
+      ALLOW_DEMO_SEED: 'true'
+      ANTHROPIC_API_KEY: ''
+      GITHUB_MCP_URL: ''
+      GITHUB_MCP_TOKEN: ''
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Generate ephemeral demo credentials
+        run: node -e "const f=require('node:fs'),c=require('node:crypto'); for (const k of ['JWT_SECRET','SEED_PASSWORD']) f.appendFileSync(process.env.GITHUB_ENV,k+'='+c.randomBytes(32).toString('hex')+'\n')"
+      - run: npm run db:setup
+      - run: npm run db:verify
+      - run: npm run smoke:insights
+      - run: npm run build
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

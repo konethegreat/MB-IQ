@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────────────────────
+# Demo Engineering Command Centre — root .gitignore
+# Maintained by Kone & Claude
+# ─────────────────────────────────────────────────────────────
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment & secrets — NEVER commit real keys (Anthropic API key lives here)
+.env
+**/.env
+.env.local
+**/.env.local
+*.key
+*.pem
+
+# Build output
+dist/
+build/
+**/dist/
+**/build/
+
+# Prisma local database (SQLite demo DB) & generated client
+# Broad globs so the DB is ignored wherever Prisma resolves it (it resolves the
+# SQLite path relative to the schema dir), never accidentally committed.
+*.db
+*.db-journal
+**/*.db
+**/*.db-journal
+**/.prisma/
+**/generated/
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated PDF docs are kept; working temp files are not
+documentation/**/*.tmp

@@ -1,0 +1,42 @@
+{
+  "name": "mb-iq-backend",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Demo Engineering Command Centre - REST API. Built by Kone & Claude.",
+  "author": "Kone",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:setup": "prisma generate && node scripts/prepare-sqlite.mjs && prisma db push && tsx src/db/seed.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:verify": "tsx src/db/verify.ts",
+    "smoke:insights": "tsx src/db/smoke-insights.ts",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.27.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "marked": "^18.0.5",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.15.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.14.0",
+    "@types/pdfkit": "^0.13.4",
+    "prisma": "^5.18.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}
