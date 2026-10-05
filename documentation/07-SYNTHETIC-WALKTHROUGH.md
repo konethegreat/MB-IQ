@@ -21,16 +21,17 @@ The same commands work in PowerShell. No `.env` setup is required. Open
 **http://127.0.0.1:4176** and use the generated password printed in that terminal.
 The password applies only to this run's fictional accounts; it is newly generated
 on each launch. Keep port 4176 free. The API uses an available loopback port and
-the browser requests reach it through Vite's `/api` proxy.
+the browser requests reach it through Vite's preview `/api` proxy.
 
-The launcher creates a SQLite database under the OS temporary directory with a
+The launcher builds the frontend and creates a SQLite database under the OS temporary directory with a
 `mbiq-synthetic-` prefix. It overrides inherited database, auth, seed, JWT and
 provider settings for its child processes. Anthropic and GitHub MCP are empty,
 and the frontend ignores `.env` API overrides. Existing repository `.env` files
 and databases are not edited or seeded. Both servers bind to `127.0.0.1`.
 
 Wait for the ready message before starting. When finished, press **Ctrl+C** in
-that terminal to stop both servers and delete this run's temporary database.
+that terminal to stop both servers and delete this run's database and compiled
+frontend. The launcher does not alter the project's `frontend/dist` output.
 Relaunching resets the fictional work. A forced process kill or power failure
 can leave its printed temporary directory behind.
 
@@ -149,7 +150,7 @@ and deterministic diagram/risk/standup checks. It covers:
 
 CI runs the API checks on Windows/Linux with Node 22/24, and the frontend build
 and Vite/proxy launcher smoke on Linux with Node 22. The launcher smoke checks
-HTTP startup, source transformation and cleanup; manual browser checks supply
+HTTP startup, the compiled entry bundle, API proxying and cleanup; manual browser checks supply
 the screenshots above. They are local evidence, not automated browser coverage.
 
 The initial regression reproduced missing sprint write scope, ignoring `sprintId`

@@ -1,7 +1,7 @@
 // Code written by Kone & Claude | The code does the following: " Starts a loopback-only browser
 // walkthrough with a temporary database, fresh credentials and no configured external providers. "
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { startDemo, root } from './demo-runtime.mjs';
 
@@ -15,13 +15,15 @@ let stopping = false;
 async function shutdown(code = 0) {
   if (stopping) return;
   stopping = true;
-  try { await demo.stop(); await closeFrontend(); }
+  try { await closeFrontend(); }
+  catch (error) { console.error(error.message); code = 1; }
+  try { await demo.stop(); }
   catch (error) { console.error(error.message); code = 1; }
   process.exit(code);
 }
 
 // Code written by Kone & Claude | The code does the following: " Bounds frontend shutdown so
-// an active development connection cannot leave the disposable check running indefinitely. "
+// an active browser connection cannot leave the disposable check running indefinitely. "
 async function closeFrontend() {
   if (!frontend) return;
   let timer;
@@ -35,30 +37,36 @@ process.once('SIGINT', () => shutdown());
 process.once('SIGTERM', () => shutdown());
 try {
   const requireFrontend = createRequire(join(root, 'frontend/package.json'));
-  const { createServer } = await import(pathToFileURL(requireFrontend.resolve('vite')).href);
+  const { build, preview } = await import(pathToFileURL(requireFrontend.resolve('vite')).href);
   const { default: react } = await import(pathToFileURL(requireFrontend.resolve('@vitejs/plugin-react')).href);
-  frontend = await createServer({
+  const outputDirectory = join(demo.directory, 'frontend');
+  if (dirname(outputDirectory) !== demo.directory) throw new Error('Frontend output must remain in the demo temporary workspace.');
+  const config = {
     root: join(root, 'frontend'), configFile: false, envFile: false, plugins: [react()],
     define: { 'import.meta.env.VITE_API_URL': JSON.stringify('') },
-    server: { host: '127.0.0.1', port: 4176, strictPort: true, proxy: { '/api': { target: demo.origin } } },
-  });
-  await frontend.listen();
+    build: { outDir: outputDirectory, emptyOutDir: true },
+    preview: { host: '127.0.0.1', port: 4176, strictPort: true, proxy: { '/api': { target: demo.origin } } },
+  };
+  console.log('Building the synthetic frontend in its temporary workspace.');
+  await build(config);
+  frontend = await preview(config);
   if (check) {
     console.log('Loopback Vite ready; checking HTTP responses.');
     const page = await fetch('http://127.0.0.1:4176', { signal: AbortSignal.timeout(10000) });
     const health = await fetch('http://127.0.0.1:4176/api/health', { signal: AbortSignal.timeout(10000) });
-    const source = await fetch('http://127.0.0.1:4176/src/main.tsx', { signal: AbortSignal.timeout(10000) });
     const html = await page.text();
     const healthData = await health.json();
-    const transformed = await source.text();
-    if (!page.ok || !html.includes('MB IQ') || !source.ok || !transformed.includes('createRoot') || !health.ok || healthData.aiConfigured || healthData.githubMcpReady) {
+    const scriptPath = html.match(/<script[^>]+src="([^"]+)"/)?.[1];
+    if (!scriptPath?.startsWith('/assets/')) throw new Error('The compiled frontend entry was not served.');
+    const source = await fetch(`http://127.0.0.1:4176${scriptPath}`, { signal: AbortSignal.timeout(10000) });
+    const compiled = await source.text();
+    if (!page.ok || !html.includes('MB IQ') || !source.ok || compiled.length < 100 || !health.ok || healthData.aiConfigured || healthData.githubMcpReady) {
       throw new Error('Synthetic launcher check failed.');
     }
-    console.log('HTTP source/proxy checks passed; stopping API and removing its database.');
-    await demo.stop();
-    console.log('Temporary database removed; closing Vite.');
+    console.log('Compiled frontend/proxy checks passed; closing Vite.');
     await closeFrontend();
-    console.log('Synthetic launcher check passed (loopback API, Vite source transform and temporary database cleanup).');
+    await demo.stop();
+    console.log('Synthetic launcher check passed (loopback API, compiled frontend and temporary workspace cleanup).');
     process.exit(0);
   }
   console.log('MB IQ synthetic walkthrough: http://127.0.0.1:4176');
