@@ -20,7 +20,11 @@ function run(args, env) {
     child.stdout.on('data', chunk => { output += chunk; });
     child.stderr.on('data', chunk => { output += chunk; });
     child.on('error', reject);
-    child.on('exit', code => code === 0 ? resolveRun(output) : reject(new Error(`Demo setup exited ${code}: ${output}`)));
+    const timer = setTimeout(() => { child.kill('SIGKILL'); reject(new Error(`Demo setup timed out: ${args.join(' ')}`)); }, 30000);
+    child.on('exit', code => {
+      clearTimeout(timer);
+      code === 0 ? resolveRun(output) : reject(new Error(`Demo setup exited ${code}: ${output}`));
+    });
   });
 }
 
@@ -53,7 +57,7 @@ async function stop(child, directory) {
 
 // Code written by Kone & Claude | The code does the following: " Seeds and verifies the ten
 // fictional accounts, starts the real HTTP server, and refuses an AI-enabled or MCP-enabled instance. "
-export async function startDemo() {
+export async function startDemo({ log = () => {} } = {}) {
   const directory = await mkdtemp(join(tmpdir(), 'mbiq-synthetic-'));
   const password = randomBytes(24).toString('base64url');
   const port = await freePort();
@@ -67,8 +71,11 @@ export async function startDemo() {
   let child;
   try {
     await writeFile(join(directory, 'demo.db'), '');
+    log('Preparing disposable schema.');
     await run(['node_modules/prisma/build/index.js', 'db', 'push', '--skip-generate'], env);
+    log('Seeding fictional accounts and work.');
     await run(['--import', 'tsx', 'src/db/seed.ts'], env);
+    log('Verifying accounts and deterministic insights.');
     const verification = await run(['--import', 'tsx', 'src/db/verify.ts'], env);
     const insights = await run(['--import', 'tsx', 'src/db/smoke-insights.ts'], env);
     child = spawn(process.execPath, ['--import', 'tsx', 'src/server.ts'], { cwd: backend, env, stdio: ['ignore', 'pipe', 'pipe'] });
@@ -95,6 +102,7 @@ export async function startDemo() {
       if (Date.now() >= deadline) throw new Error(`Demo API did not start: ${output}`);
       await new Promise(resolveWait => setTimeout(resolveWait, 200));
     }
+    log('Loopback API ready with external providers disabled.');
     return { origin, password, directory, verification, insights, stop: () => stop(child, directory) };
   } catch (error) {
     await stop(child, directory);
