@@ -61,6 +61,13 @@ middleware and routes are untouched.
 
 ## Status log
 
+Public snapshot maintenance (5 October 2026): `npm run test:workflow` uses a
+fresh temporary SQLite database and the real HTTP API. It runs `db:verify` and
+`smoke:insights` before the delivery/role assertions. Shared write scope lives in
+`middleware/team-scope.ts`; sprint creation and every existing task context are
+checked. Task creation now persists `sprintId`. CI checks Windows/Linux and Node
+22/24. Use the current synthetic walkthrough for safe local setup.
+
 | Date | Note |
 |------|------|
 | 2026-06-19 | Backend foundation scaffolded by Kone & Claude: server, RBAC, SSO-ready auth, Prisma schema, AI service, core routes, seed. |

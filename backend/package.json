@@ -14,6 +14,7 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:verify": "tsx src/db/verify.ts",
     "smoke:insights": "tsx src/db/smoke-insights.ts",
+    "test:workflow": "node --test tests/workflow.test.mjs",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {

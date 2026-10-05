@@ -28,6 +28,12 @@ committed package locks.
 
 ## Local demonstration
 
+For a disposable walkthrough with fictional roles and screenshots, follow
+[the synthetic delivery guide](documentation/07-SYNTHETIC-WALKTHROUGH.md). After
+installing both locked dependency sets, `node scripts/demo.mjs` starts a local
+browser demo with a fresh temporary database and generated credentials. It
+disables Anthropic and GitHub MCP and removes its database when stopped.
+
 Use a new checkout and a disposable database:
 
 ```bash
@@ -79,13 +85,18 @@ provider; use synthetic content while testing.
 npm run build
 npm run db:verify
 npm run smoke:insights
+npm run test:workflow
 # frontend/
 npm run build
 ```
 
 The login verification checks all ten seeded role accounts and wrong-password
 rejection against the local database. The insights smoke test checks deterministic
-demo behavior. These checks do not establish live provider behavior, organization
+demo behavior. The HTTP workflow test creates its own temporary database and
+checks project/sprint/task delivery, team write boundaries, ownership transfers,
+progress-only access, feedback persistence and zero recorded AI calls. CI runs
+that workflow on Windows and Linux with Node 22 and 24, plus a browser demo
+launcher check. These checks do not establish live provider behavior, organization
 SSO, or production readiness.
 
 See [PUBLICATION.md](PUBLICATION.md) for the snapshot record and

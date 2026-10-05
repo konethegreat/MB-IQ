@@ -54,6 +54,14 @@ runs on Windows, macOS, and any modern browser/tablet from one codebase.
 
 ## Status log
 
+Public snapshot maintenance (5 October 2026): Tasks now selects an existing
+sprint and filters Team Lead project/owner/sprint choices. Tasks and Sprint Board
+share `canEditTask` for controls; the backend remains authoritative. Project/task
+form labels are associated with controls and task statuses have accessible names.
+The synthetic walkthrough has manually verified screenshots; it does not claim
+automated browser or live AI coverage. General Firm feedback describes local
+fallbacks instead of claiming an AI call in an unconfigured instance.
+
 | Date | Note |
 |------|------|
 | 2026-06-19 | Frontend foundation scaffolded by Kone & Claude: auth context, login, role-based dashboard, sprint board, AI assistant, notes view. |

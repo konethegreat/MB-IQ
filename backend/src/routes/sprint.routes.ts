@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { prisma } from '../db/prisma';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { requirePermission } from '../middleware/rbac.middleware';
+import { teamScope, withinTeam } from '../middleware/team-scope';
 
 export const sprintRouter = Router();
 sprintRouter.use(authMiddleware);
@@ -26,17 +27,32 @@ sprintRouter.get('/', requirePermission('sprint:view'), async (req, res) => {
 });
 
 // Code written by Kone & Claude | The code does the following: " Opens a new sprint; restricted to roles
-// holding 'sprint:manage'. "
+// holding 'sprint:manage'. Team Leads may write only their squad; project/team pairs must agree. "
 sprintRouter.post('/', requirePermission('sprint:manage'), async (req, res) => {
   const { name, team, goal, projectId, startDate, endDate } = req.body ?? {};
   if (!name) {
     res.status(400).json({ error: 'A sprint name is required.' });
     return;
   }
+  const scope = await teamScope(req.user!.role, req.user!.sub);
+  const project = projectId ? await prisma.project.findUnique({ where: { id: String(projectId) } }) : null;
+  if (projectId && !project) {
+    res.status(400).json({ error: 'Unknown projectId.' });
+    return;
+  }
+  const resolvedTeam = team ?? project?.team ?? scope.team;
+  if (!withinTeam(scope, [resolvedTeam, ...(project ? [project.team] : [])])) {
+    res.status(403).json({ error: 'Forbidden: sprint and project must belong to your team.' });
+    return;
+  }
+  if (project?.team && resolvedTeam !== project.team) {
+    res.status(400).json({ error: 'The sprint team must match its project team.' });
+    return;
+  }
   const sprint = await prisma.sprint.create({
     data: {
       name,
-      team: team ?? null,
+      team: resolvedTeam,
       goal: goal ?? null,
       projectId: projectId ?? null,
       startDate: startDate ? new Date(startDate) : null,

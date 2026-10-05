@@ -89,7 +89,7 @@ export function GeneralFirmDashboard() {
 
           <form className="card section" onSubmit={submit}>
             <h3>Leave a note for the IT division</h3>
-            <p className="muted small">Your note is organised by AI — you'll see a subject, category and priority before IT receives it. Powered by the same Anthropic API key shown in the status bar above.</p>
+            <p className="muted small">Your note is saved for IT. Summaries and categories use local fallback rules when AI is not configured.</p>
             <div className="field">
               <label>Subject (optional)</label>
               <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief title for your note…" />
@@ -102,7 +102,7 @@ export function GeneralFirmDashboard() {
 
             {lastSubmitted && (
               <div className="note-organised">
-                <p className="muted small" style={{ marginBottom: 8 }}>AI organised your note:</p>
+                <p className="muted small" style={{ marginBottom: 8 }}>Note received:</p>
                 <div className="row">
                   <span className="note-summary">{lastSubmitted.summary ?? lastSubmitted.subject ?? 'Note received'}</span>
                   {lastSubmitted.classification && (
@@ -121,7 +121,7 @@ export function GeneralFirmDashboard() {
           {myNotes.length > 0 && (
             <div className="card section">
               <h3>Your Notes ({myNotes.length})</h3>
-              <p className="muted small">Previously submitted notes, organised by AI.</p>
+              <p className="muted small">Previously submitted notes and saved summaries.</p>
               {myNotes.map((n) => (
                 <div className="note-card" key={n.id}>
                   <div className="note-head">

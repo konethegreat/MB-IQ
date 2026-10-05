@@ -5,6 +5,7 @@
 // page focused on WHAT it shows. "
 
 import type { ReactNode } from 'react';
+import { can, type SessionUser } from '../../config/roles';
 
 export interface Project {
   id: string; name: string; type: string; status: string; health: string; description: string;
@@ -14,12 +15,24 @@ export interface Project {
 export interface Task {
   id: string; title: string; status: string; priority: string; dueDate?: string | null;
   projectId?: string | null; ownerId?: string | null;
-  owner?: { name: string } | null; project?: { name: string } | null; branch?: string | null;
+  owner?: { name: string; team?: string | null } | null; project?: { name: string; team?: string | null } | null;
+  sprint?: { team?: string | null } | null; branch?: string | null;
 }
 export interface DirUser { id: string; name: string; email: string; role: string; team?: string | null; avatar?: string | null }
 export interface Sprint {
   id: string; name: string; team?: string | null; goal?: string | null;
-  startDate?: string | null; endDate?: string | null; project?: { name: string } | null; _count?: { tasks: number };
+  startDate?: string | null; endDate?: string | null; projectId?: string | null; project?: { name: string } | null; _count?: { tasks: number };
+}
+
+// Code written by Kone & Claude | The code does the following: " Mirrors task write scope for
+// controls only. The server still checks every request, including crafted requests and stale views. "
+export function canEditTask(user: SessionUser | null, task: Task): boolean {
+  if (can(user, 'task:manage')) {
+    if (user?.role !== 'TEAM_CAPTAIN') return true;
+    const teams = [task.project, task.sprint, task.owner].filter(row => !!row).map(row => row!.team);
+    return !!user.team && teams.length > 0 && teams.every(team => team === user.team);
+  }
+  return can(user, 'task:own') && task.ownerId === user?.id;
 }
 
 export type AiMode = 'MAX' | 'SAVER';
