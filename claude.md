@@ -67,6 +67,13 @@ clear trail of Kone's work:
 
 ## 7. Status log
 
+Public snapshot maintenance (5 October 2026): use feature branches from `main`
+and PR checks for `konethegreat/MB-IQ`. The synthetic delivery guide is
+`documentation/07-SYNTHETIC-WALKTHROUGH.md`. `node scripts/demo.mjs` runs an
+isolated local demo; API workflow checks now cover team-scoped sprint/task
+writes and saved sprint assignment. SSO and database migration remain separate
+integration work; historical plug-and-go claims below do not verify them.
+
 | Date | Milestone | Notes |
 |------|-----------|-------|
 | 2026-06-19 | Project kickoff & scaffold | Branch created, stack chosen, structure + docs + backend/frontend foundation laid by Kone & Claude. v0.1 prototype preserved in `prototype-v0.1/`. |

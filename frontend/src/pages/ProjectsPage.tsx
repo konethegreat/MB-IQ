@@ -43,25 +43,25 @@ export function ProjectsPage() {
         <form className="card section" onSubmit={create}>
           <h3>New Project</h3>
           <div className="grid two">
-            <div className="field"><label>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
-            <div className="field"><label>Type</label>
-              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
+            <div className="field"><label htmlFor="project-name">Name</label><input id="project-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+            <div className="field"><label htmlFor="project-type">Type</label>
+              <select id="project-type" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
                 <option>Internal Operations Project</option><option>Client Delivery Project</option>
                 <option>Social Impact Technology Project</option><option>Experimental / Innovation Project</option>
               </select>
             </div>
-            <div className="field"><label>Team</label>
-              <select value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })}>
+            <div className="field"><label htmlFor="project-team">Team</label>
+              <select id="project-team" value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })}>
                 <option>Team Alpha</option><option>Team Apex</option><option>Management</option>
               </select>
             </div>
-            <div className="field"><label>Priority</label>
-              <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
+            <div className="field"><label htmlFor="project-priority">Priority</label>
+              <select id="project-priority" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}>
                 <option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
               </select>
             </div>
           </div>
-          <div className="field"><label>Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+          <div className="field"><label htmlFor="project-description">Description</label><textarea id="project-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
           <button className="btn green" disabled={!form.name.trim()}>Create Project</button>
         </form>
       )}

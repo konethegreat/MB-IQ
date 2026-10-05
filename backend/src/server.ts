@@ -71,6 +71,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error.' });
 });
 
-app.listen(env.port, () => {
+app.listen(env.port, env.host, () => {
   console.log(`MB IQ API listening on http://localhost:${env.port}  (auth: ${env.authProvider})`);
 });

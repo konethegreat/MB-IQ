@@ -5,8 +5,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
-import { can } from '../config/roles';
-import { type Task, BOARD_STATUSES, priorityClass, relativeDue, Spinner, Avatar } from './dashboards/shared';
+import { type Task, canEditTask, BOARD_STATUSES, priorityClass, relativeDue, Spinner, Avatar } from './dashboards/shared';
 
 export function SprintBoardPage() {
   const { user } = useAuth();
@@ -25,7 +24,7 @@ export function SprintBoardPage() {
     catch (e) { setError((e as Error).message); }
   }
   function editable(t: Task): boolean {
-    return can(user, 'task:manage') || (can(user, 'task:own') && t.ownerId === user?.id);
+    return canEditTask(user, t);
   }
 
   return (
@@ -51,7 +50,7 @@ export function SprintBoardPage() {
                       <div className="av-row"><Avatar name={t.owner?.name ?? 'Unassigned'} sm /><span className="muted small">{t.owner?.name ?? 'Unassigned'}</span></div>
                       <small>{t.project?.name ?? 'No project'} · <span className={`due ${rd.overdue ? 'over' : ''}`}>{rd.text}</span></small>
                       {editable(t) && (
-                        <select value={t.status} onChange={(e) => changeStatus(t, e.target.value)}>
+                        <select aria-label={`Status for ${t.title}`} value={t.status} onChange={(e) => changeStatus(t, e.target.value)}>
                           {BOARD_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
                       )}

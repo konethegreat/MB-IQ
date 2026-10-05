@@ -7,14 +7,12 @@ permissions:
   contents: read
 jobs:
   backend:
-    runs-on: ubuntu-latest
-    env:
-      NODE_ENV: development
-      DATABASE_URL: file:./ci-demo.db
-      ALLOW_DEMO_SEED: 'true'
-      ANTHROPIC_API_KEY: ''
-      GITHUB_MCP_URL: ''
-      GITHUB_MCP_TOKEN: ''
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['22', '24']
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: backend
@@ -22,17 +20,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm audit --audit-level=moderate
-      - name: Generate ephemeral demo credentials
-        run: node -e "const f=require('node:fs'),c=require('node:crypto'); for (const k of ['JWT_SECRET','SEED_PASSWORD']) f.appendFileSync(process.env.GITHUB_ENV,k+'='+c.randomBytes(32).toString('hex')+'\n')"
-      - run: npm run db:setup
-      - run: npm run db:verify
-      - run: npm run smoke:insights
       - run: npm run build
+      - name: Verify synthetic accounts, insights and HTTP role workflow in an isolated database
+        run: npm run test:workflow
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -48,3 +43,7 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=moderate
       - run: npm run build
+      - name: Install API dependencies for the disposable launcher check
+        run: npm ci --prefix ../backend
+      - name: Verify the browser demo starts and cleans up without external providers
+        run: node ../scripts/demo.mjs --check

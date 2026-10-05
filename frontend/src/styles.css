@@ -262,6 +262,7 @@ label { font-size: 13px; color: var(--muted); font-weight: 700; }
 /* ====================== TABLES =========================================== */
 .table-wrap { width: 100%; overflow-x: auto; border-radius: 14px; }
 .table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table select[aria-label^="Status for"] { min-width: 125px; }
 .table th, .table td { text-align: left; padding: 12px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .table th { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; background: #f9fbfc; position: sticky; top: 0; }
 .table tbody tr { transition: background var(--t-fast) var(--ease); }
